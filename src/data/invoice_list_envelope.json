@@ -1,0 +1,402 @@
+{
+  "page": {
+    "key": "invoiceList",
+    "route": "/invoices",
+    "surface": "list",
+    "endpoints": {
+      "envelope": "/p2p/template?id=tpl_invoice_list_default"
+    }
+  },
+  "schemaVersion": "2.1.0",
+  "meta": {
+    "documentId": null,
+    "documentType": "INVOICE",
+    "locale": "en-IN",
+    "currency": "INR"
+  },
+  "data": {
+    "permissions": {
+      "create": true,
+      "export": true,
+      "approve": true,
+      "remind": true
+    }
+  },
+  "template": {
+    "id": "tpl_invoice_list_default",
+    "key": "INVOICE_LIST_DEFAULT",
+    "name": "Invoices",
+    "layout": {
+      "contentWidth": "full",
+      "contentHeight": "viewport",
+      "headerDivider": "none"
+    },
+    "theme": {
+      "tokens": {
+        "density": "comfortable",
+        "emptyValueText": "—",
+        "unknownNodePolicy": "skip"
+      }
+    },
+    "apis": {
+      "invoiceList": {
+        "url": "/p2p/data?id=tpl_invoice_list_default",
+        "method": "GET",
+        "query": "{{params.query}}",
+        "queryEncoding": "json",
+        "responseSerializer": "recordPage",
+        "config": {
+          "rowsPath": "rows",
+          "totalPath": "total",
+          "hasMorePath": "hasMore"
+        }
+      },
+      "invoiceCounts": {
+        "url": "/p2p/counts?id=tpl_invoice_list_default",
+        "method": "GET",
+        "query": {
+          "views": "{{params.views}}"
+        },
+        "queryEncoding": "json",
+        "responseSerializer": "pick",
+        "config": {
+          "path": "counts"
+        }
+      },
+      "savedViews": {
+        "url": "/p2p/saved_views?id=tpl_invoice_list_default",
+        "method": "GET"
+      },
+      "createSavedView": {
+        "url": "/p2p/saved_views?id=tpl_invoice_list_default",
+        "method": "POST"
+      },
+      "invoiceFilterOptions": {
+        "url": "/p2p/filter_options?id=tpl_invoice_list_default",
+        "method": "GET"
+      },
+      "bulkAction": {
+        "url": "/p2p/bulk_action?id=tpl_invoice_list_default",
+        "method": "POST"
+      }
+    },
+    "appBar": {
+      "title": {
+        "static": "Invoices"
+      },
+      "actions": [
+        {
+          "id": "askClara",
+          "type": "button",
+          "props": {
+            "label": {
+              "static": "Ask Clara"
+            },
+            "action": {
+              "type": "callback",
+              "payload": {
+                "action": "askClara"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "zones": {
+      "header": [],
+      "body": [
+        {
+          "id": "sec_invoices",
+          "key": "invoices",
+          "type": "table",
+          "props": {
+            "rowSource": "api",
+            "api": "invoiceList",
+            "rowBinding": "invoices",
+            "rowKey": "id",
+            "selectable": true,
+            "emptyText": "No invoices match this view",
+            "views": {
+              "default": "all",
+              "counts": {
+                "api": "invoiceCounts"
+              },
+              "items": [
+                {
+                  "id": "all",
+                  "label": {
+                    "static": "All"
+                  },
+                  "filters": [],
+                  "count": {
+                    "binding": "$counts.all"
+                  }
+                },
+                {
+                  "id": "pendingApproval",
+                  "label": {
+                    "static": "Pending Approval"
+                  },
+                  "filters": [
+                    {
+                      "field": "status",
+                      "operator": "in",
+                      "value": ["UNDER_REVIEW"]
+                    }
+                  ],
+                  "count": {
+                    "binding": "$counts.pendingApproval"
+                  }
+                },
+                {
+                  "id": "approved",
+                  "label": {
+                    "static": "Approved"
+                  },
+                  "filters": [
+                    {
+                      "field": "status",
+                      "operator": "in",
+                      "value": ["APPROVED"]
+                    }
+                  ],
+                  "count": {
+                    "binding": "$counts.approved"
+                  }
+                },
+                {
+                  "id": "paid",
+                  "label": {
+                    "static": "Paid"
+                  },
+                  "filters": [
+                    {
+                      "field": "status",
+                      "operator": "in",
+                      "value": ["PAID", "PARTIALLY_PAID"]
+                    }
+                  ],
+                  "count": {
+                    "binding": "$counts.paid"
+                  }
+                },
+                {
+                  "id": "overdue",
+                  "label": {
+                    "static": "Overdue"
+                  },
+                  "filters": [
+                    {
+                      "field": "status",
+                      "operator": "in",
+                      "value": ["OVERDUE"]
+                    }
+                  ],
+                  "count": {
+                    "binding": "$counts.overdue"
+                  }
+                },
+                {
+                  "id": "disputed",
+                  "label": {
+                    "static": "Disputed"
+                  },
+                  "filters": [
+                    {
+                      "field": "status",
+                      "operator": "in",
+                      "value": ["DISPUTED"]
+                    }
+                  ],
+                  "count": {
+                    "binding": "$counts.disputed"
+                  }
+                }
+              ]
+            },
+            "toolbar": {
+              "search": true,
+              "fields": true,
+              "filter": true,
+              "sortBy": true,
+              "actions": [
+                {
+                  "id": "new",
+                  "type": "button",
+                  "props": {
+                    "label": {
+                      "static": "New invoice"
+                    },
+                    "action": {
+                      "type": "navigate",
+                      "route": "/invoice-new"
+                    }
+                  },
+                  "visibleWhen": {
+                    "binding": "permissions.create",
+                    "operator": "equals",
+                    "value": true
+                  }
+                },
+                {
+                  "id": "bulkActions",
+                  "type": "menu",
+                  "props": {
+                    "items": ["exportReport", "bulkApprove", "sendReminder"]
+                  }
+                }
+              ]
+            },
+            "pagination": {
+              "pageSize": 20,
+              "pageSizeOptions": [20, 50, 100],
+              "mode": "server",
+              "pageSizeChangeable": true,
+              "placement": "stickyBottom"
+            },
+            "rowAction": {
+              "type": "navigate",
+              "route": "/invoice-document/{{$row.id}}"
+            }
+          },
+          "columns": [
+            {
+              "id": "c_number",
+              "key": "number",
+              "label": "Invoice Number",
+              "binding": "number",
+              "valueType": "text",
+              "width": 190,
+              "pin": "left",
+              "sortable": true,
+              "searchable": true,
+              "badge": {
+                "label": "NEW",
+                "binding": "isNew",
+                "tone": "info"
+              }
+            },
+            {
+              "id": "c_poNumber",
+              "key": "poNumber",
+              "label": "PO Number",
+              "binding": "purchaseOrder.number",
+              "valueType": "text",
+              "sortable": true,
+              "searchable": true
+            },
+            {
+              "id": "c_status",
+              "key": "status",
+              "label": "Invoice Status",
+              "binding": "status",
+              "valueType": "status",
+              "sortable": true,
+              "filterable": {
+                "type": "set"
+              },
+              "options": [
+                { "value": "UNDER_REVIEW", "label": "Under Review", "tone": "warning" },
+                { "value": "APPROVED", "label": "Approved", "tone": "success" },
+                { "value": "PAID", "label": "Paid" },
+                { "value": "PARTIALLY_PAID", "label": "Partially Paid" },
+                { "value": "OVERDUE", "label": "Overdue", "tone": "danger" },
+                { "value": "DISPUTED", "label": "Disputed" },
+                { "value": "REJECTED", "label": "Rejected" }
+              ]
+            },
+            {
+              "id": "c_vendorName",
+              "key": "vendorName",
+              "label": "Vendor Name",
+              "binding": "vendor.name",
+              "valueType": "text",
+              "width": 190,
+              "ellipsis": true,
+              "sortable": true,
+              "searchable": true
+            },
+            {
+              "id": "c_invoiceDate",
+              "key": "invoiceDate",
+              "label": "Invoice Date",
+              "binding": "invoiceDate",
+              "valueType": "date",
+              "width": 140,
+              "sortable": true,
+              "format": {
+                "pattern": "d MMM yyyy"
+              }
+            },
+            {
+              "id": "c_dueDate",
+              "key": "dueDate",
+              "label": "Due Date",
+              "binding": "dueDate",
+              "valueType": "date",
+              "width": 140,
+              "sortable": true
+            },
+            {
+              "id": "c_amount",
+              "key": "amount",
+              "label": "Invoice Amount",
+              "binding": "amount",
+              "valueType": "currency",
+              "align": "right",
+              "sortable": true,
+              "format": {
+                "decimals": 0,
+                "currencyBinding": "currency"
+              }
+            },
+            {
+              "id": "c_matchStatus",
+              "key": "matchStatus",
+              "label": "Match Status",
+              "binding": "matchStatus",
+              "valueType": "status",
+              "filterable": {
+                "type": "set"
+              },
+              "options": [
+                { "value": "MATCHED", "label": "Matched", "tone": "success" },
+                { "value": "DISCREPANCY", "label": "Discrepancy", "tone": "danger" }
+              ]
+            },
+            {
+              "id": "c_vendorCode",
+              "key": "vendorCode",
+              "label": "Vendor Code",
+              "binding": "vendor.code",
+              "valueType": "text",
+              "searchable": true
+            },
+            {
+              "id": "c_department",
+              "key": "department",
+              "label": "Department",
+              "binding": "department.name",
+              "valueType": "text",
+              "filterable": {
+                "type": "set",
+                "field": "department.id",
+                "optionsSource": {
+                  "api": "invoiceFilterOptions"
+                }
+              }
+            },
+            {
+              "id": "c_createdBy",
+              "key": "createdBy",
+              "label": "Created By",
+              "binding": "createdBy.name",
+              "valueType": "text"
+            }
+          ]
+        }
+      ],
+      "footer": []
+    }
+  }
+}

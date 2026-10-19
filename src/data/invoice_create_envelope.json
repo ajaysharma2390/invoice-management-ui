@@ -1,0 +1,172 @@
+{
+  "schemaVersion": "1.0",
+  "meta": {
+    "documentType": "INVOICE",
+    "mode": "form",
+    "locale": "en-IN",
+    "currency": "INR",
+    "renderMode": "screen",
+    "printScope": null
+  },
+  "template": {
+    "id": "tpl_invoice_create_v1",
+    "key": "invoiceCreate",
+    "name": "New Invoice",
+    "documentType": "INVOICE",
+    "version": "1",
+    "publishedAt": "2026-10-16T09:00:00Z",
+    "origin": "system",
+    "capabilities": {
+      "draftable": false
+    },
+    "labels": {
+      "submit": "Create Invoice"
+    },
+    "apis": {
+      "purchaseOrderOptions": {
+        "url": "/p2p/options",
+        "method": "GET",
+        "query": {
+          "id": "tpl_invoice_create_v1",
+          "field": "purchaseOrder.id"
+        },
+        "config": {
+          "listPath": "values"
+        }
+      },
+      "create": {
+        "url": "/p2p/data",
+        "method": "POST",
+        "query": {
+          "id": "tpl_invoice_create_v1",
+          "record_id": "{{data.record.id}}"
+        },
+        "headers": {
+          "Idempotency-Key": "{{idempotencyKey}}"
+        },
+        "requestSerializer": "payloadMap"
+      }
+    },
+    "submit": {
+      "statusByIntent": {
+        "submit": "SUBMITTED"
+      },
+      "notifications": {
+        "submit": {
+          "message": "Invoice created",
+          "description": "The invoice was submitted successfully."
+        },
+        "error": {
+          "message": "Could not save this invoice",
+          "description": "Something went wrong. Please try again."
+        }
+      },
+      "payloadMap": {
+        "documentType": {
+          "source": "documentType"
+        },
+        "status": {
+          "source": "status"
+        },
+        "baseVersion": "record.version",
+        "document.number": "document.number",
+        "document.invoiceType": "document.invoiceType",
+        "document.date": "document.date",
+        "document.dueDate": "document.dueDate",
+        "document.department": "document.department",
+        "document.currency": "document.currency",
+        "purchaseOrder": "purchaseOrder.id",
+        "vendor.gstin": "vendor.gstin",
+        "terms.payment": "terms.payment",
+        "beneficiary": "beneficiary",
+        "notes": "notes",
+        "lineItems": {
+          "binding": "lineItems",
+          "itemMap": {
+            "materialCode": "materialCode",
+            "description": "description",
+            "invoiceQuantity": "invoiceQuantity",
+            "uom": "uom",
+            "unitPrice": "unitPrice",
+            "taxPercent": "taxPercent"
+          }
+        },
+        "touchedFields": {
+          "source": "touchedFields"
+        }
+      }
+    },
+    "appBar": {
+      "breadcrumb": [
+        {
+          "id": "bc_list",
+          "label": {
+            "static": "Invoices"
+          },
+          "route": "/"
+        },
+        {
+          "id": "bc_current",
+          "label": {
+            "binding": "document.breadcrumb"
+          }
+        }
+      ]
+    },
+    "navigation": {
+      "mode": "tabs",
+      "overflow": "scroll"
+    },
+    "theme": {
+      "tokens": {
+        "unknownNodePolicy": "skip"
+      }
+    },
+    "zones": {
+      "aside": [
+        {
+          "id": "blk_sourceFile",
+          "key": "sourceFile",
+          "type": "filePreview",
+          "props": {
+            "accept": "application/pdf,image/*"
+          },
+          "content": {
+            "binding": "document.sourceFile",
+            "placeholder": "Drag & drop the invoice here",
+            "helpText": "or click to browse — PDF, PNG, JPG"
+          }
+        }
+      ],
+      "body": [
+        {
+          "id": "sec_invoiceDetails",
+          "key": "invoiceDetails",
+          "type": "stack",
+          "nav": {
+            "label": "Invoice Details",
+            "anchor": "invoiceDetails"
+          }
+        },
+        {
+          "id": "sec_taxEInvoice",
+          "key": "taxAndEInvoice",
+          "type": "group",
+          "nav": {
+            "label": "Tax & E-Invoice",
+            "anchor": "taxAndEInvoice"
+          }
+        },
+        {
+          "id": "sec_paymentInformation",
+          "key": "paymentInformation",
+          "type": "fieldList",
+          "nav": {
+            "label": "Payment Information",
+            "anchor": "paymentInformation"
+          }
+        }
+      ]
+    }
+  }
+}

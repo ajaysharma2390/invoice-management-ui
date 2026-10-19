@@ -1,0 +1,176 @@
+{
+  "page": {
+    "key": "invoiceDetail",
+    "route": "/invoice-document/:documentId",
+    "payloadKey": "invoice",
+    "endpoints": {
+      "template": "/p2p/template?id=tpl_invoice_default",
+      "data": "/p2p/data?id=tpl_invoice_default&record_id=:documentId"
+    }
+  },
+  "schemaVersion": "2.0.0",
+  "meta": {
+    "documentType": "INVOICE",
+    "locale": "en-IN",
+    "currency": "INR",
+    "renderMode": "screen"
+  },
+  "template": {
+    "id": "tpl_invoice_default",
+    "key": "INVOICE_DEFAULT",
+    "name": "Invoice",
+    "documentType": "INVOICE",
+    "version": "1",
+    "capabilities": {
+      "amendable": true
+    },
+    "apis": {
+      "lineItems": {
+        "url": "/p2p/line_items?id=tpl_invoice_default&record_id=:documentId",
+        "method": "GET",
+        "queryEncoding": "json",
+        "config": {
+          "rowsPath": "rows",
+          "totalPath": "total",
+          "hasMorePath": "hasMore"
+        }
+      },
+      "purchaseOrders": {
+        "url": "/p2p/links?id=tpl_invoice_default&record_id=:documentId&kind=purchase_orders",
+        "method": "GET",
+        "queryEncoding": "json",
+        "config": {
+          "rowsPath": "rows",
+          "totalPath": "total"
+        }
+      },
+      "goodsReceipts": {
+        "url": "/p2p/links?id=tpl_invoice_default&record_id=:documentId&kind=goods_receipts",
+        "method": "GET",
+        "queryEncoding": "json",
+        "config": {
+          "rowsPath": "rows",
+          "totalPath": "total"
+        }
+      },
+      "activity": {
+        "url": "/p2p/activity?id=tpl_invoice_default&record_id=:documentId",
+        "method": "GET"
+      },
+      "options": {
+        "url": "/p2p/options?id=tpl_invoice_default&record_id=:documentId",
+        "method": "GET",
+        "config": {
+          "valuesPath": "values"
+        }
+      },
+      "amend": {
+        "url": "/p2p/amendments?id=tpl_invoice_default&record_id=:documentId",
+        "method": "POST"
+      },
+      "upload": {
+        "url": "/trade/upload_file",
+        "method": "POST"
+      },
+      "attach": {
+        "url": "/p2p/attachments?id=tpl_invoice_default&record_id=:documentId",
+        "method": "POST"
+      }
+    },
+    "sections": [
+      {
+        "id": "invoice-details",
+        "title": "Invoice details",
+        "fields": [
+          { "label": "Invoice type", "binding": "document.invoiceType", "editable": "select", "optionsField": "document.invoiceType" },
+          { "label": "Invoice date", "binding": "document.date", "type": "date" },
+          { "label": "Due date", "binding": "document.dueDate", "editable": "date" },
+          { "label": "Department", "binding": "document.department", "editable": "select", "optionsField": "document.department" },
+          { "label": "Purchase order", "binding": "document.purchaseOrder.number", "linkBinding": "document.purchaseOrder.id" },
+          { "label": "Reference", "binding": "document.reference" }
+        ]
+      },
+      {
+        "id": "vendor",
+        "title": "Supplier",
+        "fields": [
+          { "label": "Vendor", "binding": "vendor.legalName", "editable": "select", "optionsField": "vendor.legalName" },
+          { "label": "Vendor code", "binding": "vendor.code" },
+          { "label": "GSTIN", "binding": "vendor.gstin" },
+          { "label": "Address", "binding": "vendor.officeAddress" },
+          { "label": "Email", "binding": "vendor.email" },
+          { "label": "Phone", "binding": "vendor.phone" }
+        ]
+      },
+      {
+        "id": "buyer",
+        "title": "Bill to",
+        "fields": [
+          { "label": "Buyer", "binding": "buyer.legalName" },
+          { "label": "GSTIN", "binding": "buyer.gstin" },
+          { "label": "Billing address", "binding": "buyer.billingAddress" },
+          { "label": "Department", "binding": "document.department" }
+        ]
+      },
+      {
+        "id": "payment",
+        "title": "Payment details",
+        "fields": [
+          { "label": "Payment terms", "binding": "terms.payment" },
+          { "label": "Payment status", "binding": "payment.status" },
+          { "label": "Payment method", "binding": "payment.method" },
+          { "label": "Beneficiary", "binding": "beneficiary.name" },
+          { "label": "Account ending", "binding": "beneficiary.accountLast4" }
+        ]
+      },
+      {
+        "id": "accounting",
+        "title": "Accounting",
+        "fields": [
+          { "label": "Cost center", "binding": "accounting.costCenter" },
+          { "label": "GL account", "binding": "accounting.glAccount" },
+          { "label": "Tax ID", "binding": "accounting.taxId" }
+        ]
+      }
+    ],
+    "lineItems": {
+      "api": "lineItems",
+      "pageSize": 10,
+      "columns": [
+        { "key": "materialCode", "title": "Item", "dataIndex": "materialName" },
+        { "key": "description", "title": "Description", "dataIndex": "description" },
+        { "key": "hsnCode", "title": "HSN / SAC", "dataIndex": "hsnCode" },
+        { "key": "invoiceQuantity", "title": "Qty", "dataIndex": "invoiceQuantity", "align": "right" },
+        { "key": "unitPrice", "title": "Unit price", "dataIndex": "unitPrice", "type": "currency", "align": "right" },
+        { "key": "matchStatus", "title": "Match", "dataIndex": "matchStatus", "type": "status" },
+        { "key": "totalAmount", "title": "Amount", "dataIndex": "totalAmount", "type": "currency", "align": "right" }
+      ]
+    },
+    "linkedRecords": [
+      {
+        "id": "purchaseOrders",
+        "title": "Purchase orders",
+        "kind": "purchase_orders",
+        "pageSize": 5,
+        "columns": [
+          { "key": "number", "title": "PO number", "dataIndex": "number" },
+          { "key": "status", "title": "Status", "dataIndex": "status", "type": "status" },
+          { "key": "date", "title": "PO date", "dataIndex": "date", "type": "date" },
+          { "key": "value", "title": "Value", "dataIndex": "value", "type": "currency" }
+        ]
+      },
+      {
+        "id": "goodsReceipts",
+        "title": "Goods receipts",
+        "kind": "goods_receipts",
+        "pageSize": 5,
+        "columns": [
+          { "key": "number", "title": "GRN number", "dataIndex": "number" },
+          { "key": "status", "title": "Status", "dataIndex": "status", "type": "status" },
+          { "key": "date", "title": "Received", "dataIndex": "date", "type": "date" },
+          { "key": "itemsCovered", "title": "Items", "dataIndex": "itemsCovered", "type": "coverage" }
+        ]
+      }
+    ]
+  }
+}
