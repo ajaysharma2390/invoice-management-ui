@@ -1,17 +1,10 @@
-import { readFile } from 'node:fs/promises'
-
-const envelopePath = new URL('../src/data/invoice_list_envelope.json', import.meta.url)
-const detailEnvelopePath = new URL(
-  '../src/data/invoice_detail_envelope.json',
-  import.meta.url,
-)
-const createEnvelopePath = new URL(
-  '../src/data/invoice_create_envelope.json',
-  import.meta.url,
-)
-const envelope = JSON.parse(await readFile(envelopePath, 'utf8'))
-const detailEnvelope = JSON.parse(await readFile(detailEnvelopePath, 'utf8'))
-const createEnvelope = JSON.parse(await readFile(createEnvelopePath, 'utf8'))
+import envelope from '../src/data/invoice_list_envelope.json' with { type: 'json' }
+import detailEnvelope from '../src/data/invoice_detail_envelope.json' with {
+  type: 'json',
+}
+import createEnvelope from '../src/data/invoice_create_envelope.json' with {
+  type: 'json',
+}
 const statuses = [
   'UNDER_REVIEW',
   'APPROVED',
