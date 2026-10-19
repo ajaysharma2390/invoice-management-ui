@@ -1156,6 +1156,15 @@ async function handleRequest(request, response, url) {
   sendError(response, 404, 'NOT_FOUND', 'Mock invoice API endpoint not found.')
 }
 
+export async function handleMockApiRequest(request, response, url) {
+  try {
+    await handleRequest(request, response, url)
+  } catch (error) {
+    if (response.headersSent) throw error
+    sendError(response, 400, 'INVALID_REQUEST', error.message)
+  }
+}
+
 export function invoiceMockApi() {
   return {
     name: 'invoice-list-mock-api',
@@ -1172,14 +1181,15 @@ export function invoiceMockApi() {
         let url
         try {
           url = new URL(request.url, 'http://localhost')
-          await handleRequest(request, response, url)
+          await handleMockApiRequest(request, response, url)
         } catch (error) {
           if (response.headersSent) {
             server.config.logger.error(error)
             response.destroy(error)
             return
           }
-          sendError(response, 400, 'INVALID_REQUEST', error.message)
+          server.config.logger.error(error)
+          sendError(response, 500, 'INTERNAL_ERROR', 'The mock API request failed.')
         }
       })
       server.config.logger.info(

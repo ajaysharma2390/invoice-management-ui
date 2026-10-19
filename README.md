@@ -15,12 +15,12 @@ npm install
 npm run dev
 ```
 
-By default, Vite provides a development-only mock API with 120 deterministic
-invoice records. It implements the list, filter, search, sort, pagination,
-counts, saved-view, filter-options, bulk-action, and invoice-detail endpoints,
-including amendment, attachment, and invoice-create flows, so the UI can be
-tried without a running backend. Saved views and invoice changes in the mock
-are held in memory and reset when the dev server restarts.
+The project includes a mock API with 120 deterministic invoice records for
+local development and Netlify demos. It implements the list, filter, search,
+sort, pagination, counts, saved-view, filter-options, bulk-action, and
+invoice-detail endpoints, including amendment, attachment, and invoice-create
+flows. Changes to mock data are held in memory and are temporary; they reset
+when the development server or a serverless function instance restarts.
 
 The page uses:
 
@@ -45,12 +45,13 @@ The page uses:
 - `GET /api/p2p/options?id=tpl_invoice_create_v1&field=purchaseOrder.id`
 - `POST /api/p2p/data?id=tpl_invoice_create_v1` (requires `Idempotency-Key`)
 
-To use a real backend instead, set `VITE_API_PROXY_TARGET` to its origin (for
-example, `http://localhost:3000`) in an untracked `.env.local` file. Vite
-forwards `/api` requests to that origin and disables the mock API.
+For local development against a real backend, set `VITE_API_PROXY_TARGET` to
+its origin (for example, `http://localhost:3000`) in an untracked `.env.local`
+file. Vite forwards `/api` requests to that origin and disables its local mock.
 The frontend sends the `access-token` and `app-version` headers from session
 storage (the app version defaults to `20.0.0`) and sends `lightspeed-token:
-null` on every request.
+null` on every request. No production backend is configured; Netlify routes
+`/api/*` to the dummy-data function.
 
 ## Checks
 
@@ -61,10 +62,8 @@ npm run build
 
 ## Deploying to Netlify
 
-Import the GitHub repository into Netlify and use the build settings from
-`netlify.toml` (`npm run build`, with `dist` as the publish directory). The
-redirect rule serves the app entry point for invoice routes on direct visits.
-
-The development mock API is not included in production builds. A production
-backend must be available at the same origin's `/api` paths for invoice data
-operations to work; the default Netlify settings only publish the frontend.
+Import the GitHub repository into Netlify. The build settings and redirects are
+defined in `netlify.toml`: `npm run build`, publish `dist`, route API requests
+to the mock function, and serve the app entry point on direct visits to invoice
+routes. This demo uses dummy data only; the mock API does not persist changes
+and must be replaced with a production backend before real use.
